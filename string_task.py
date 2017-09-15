@@ -1,17 +1,19 @@
 def verbing(s):
     if len(s)>2:
-        print(s[-3:0])
-        if s[-3:len(s)]=="ing":
+        if s[-3:]=="ing":
             s=s+"ly"
         else:
             s=s+"ing"
     return s
 def not_bad(s):
-    if (s.find("bad")>s.find("not")):
-        s1=s[s.find("not"):s.find("bad")+3]
-        s=s.replace(s1,"good")
+    a=s.find("not")
+    b=s.find("bad")
+    if (a<b):
+        s=s[:a]+"good"+s[b+3:]
     return s
 def front_back(a, b):
-    s=a[0:(int)((len(a)-1)/2)+1]+b[0:(int)((len(b)-1)/2)+1]+a[(int)((len(a)+1)/2):len(a)]+b[(int)((len(b)+1)/2):len(b)]
+    c=(len(a)+1)//2
+    d=(len(b)+1)//2
+    s=a[:c]+b[:d]+a[c:]+b[d:]
     return s;
 
