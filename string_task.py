@@ -6,9 +6,11 @@ def verbing(s):
             s=s+"ing"
     return s
 def not_bad(s):
+    a=-1
+    b=-1
     a=s.find("not")
     b=s.find("bad")
-    if (a<b):
+    if a<b and a!=-1:
         s=s[:a]+"good"+s[b+3:]
     return s
 def front_back(a, b):

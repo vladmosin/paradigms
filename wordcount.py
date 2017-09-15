@@ -6,8 +6,8 @@ def print_words(words):
             d[s1]=1;
         else:
             d[s1]+=1
-    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=True):
-        print(ukaz," ",d[ukaz])
+    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=False):
+        print(ukaz,d[ukaz])
 def print_top(words):
     d=dict()
     for s in words:
@@ -16,8 +16,11 @@ def print_top(words):
             d[s1]=1;
         else:
             d[s1]+=1
-    h=0
-    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=True):
-        if h<20:
-            print(ukaz," ",d[ukaz])
-            h+=1
+    d1=sorted(d.keys(),key=lambda k : d[k],reverse=False)
+    if (len(d1)>20):
+        for uk in d1[-20:]:
+            print(uk,d[uk])
+    else:
+        for uk in d1:
+            print(uk,d[uk])
+        
