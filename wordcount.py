@@ -9,10 +9,10 @@ def di(words):
     return d
 def print_words(words):
     d=di(words)
-    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=False):
+    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=True):
         print(ukaz,d[ukaz])
 def print_top(words):
-    d=di(wodrs)
-    d1=sorted(d.keys(),key=lambda k : d[k],reverse=False)
-    for uk in d1[-20:]:
+    d=di(words)
+    d1=sorted(d.keys(),key=lambda k : d[k],reverse=True)
+    for uk in d1[:20]:
         print(uk,d[uk])
