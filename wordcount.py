@@ -9,7 +9,7 @@ def di(words):
     return d
 def print_words(words):
     d=di(words)
-    for ukaz in sorted(d.keys(),key=lambda k : d[k],reverse=True):
+    for ukaz in sorted(d.keys(),reverse=False):
         print(ukaz,d[ukaz])
 def print_top(words):
     d=di(words)
