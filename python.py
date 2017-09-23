@@ -16,7 +16,7 @@ def main():
 	d = dict()
 	for path, _, files in walk(s):	
 		for f_names in files:
-			if f_files[0] != '.' and f.files[0] != '~' :
+			if f_files[0] != '.' and f_files[0] != '~' :
 				if not os.path.islink(os.path.join(path, f_names)):
 					n = hashing(os.path.join(path, f_names))
 					if n not in d:
