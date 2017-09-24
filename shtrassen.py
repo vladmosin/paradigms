@@ -18,7 +18,7 @@ def multiply(a, b):
 	for i in range(f):
 		for k in range(f):
 			for j in range(f):
-				c[i][j] = a[i][k] + b[k][j]
+				r[i][j] += a[i][k] + b[k][j]
 	return r
 	
 	
@@ -85,7 +85,10 @@ def main():
 	a = rightsize(inp(n))
 	b = rightsize(inp(n))
 	c = shtrassen(a, b)
-	return c
+	for i in range(n):
+		for j in range(n):
+			print(c[i][j])
+		print('\n') 
 if __name__ == "__main__":
 	main()	
 
