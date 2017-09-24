@@ -3,7 +3,7 @@ import numpy as np
 
 def rightsize(a):
 	k = 1
-	n = len(a[0])
+	n = np.shape(a[0])
 	while k < n:
 		k *= 2
 	x = np.zeros((n, k - n))
@@ -12,48 +12,19 @@ def rightsize(a):
 	return r
 	
 	
-def multiply(a, b):
-	f = len(a[0])
-	r = np.zeros((f,f))
-	for i in range(f):
-		for k in range(f):
-			for j in range(f):
-				r[i][j] += a[i][k] * b[k][j]
-	return r
-	
-	
 def inp(n):
-	a = np.zeros((n, n))
+	a = ([],[])
 	for i in range(n):
 		ls = input().split()
 		for index in range(n):
-			a[i][index] = int(ls[index])
-	return a
+			a[i].append(int(j) for j in input().split())
+ 	return a
 
-
-def summ(a, b):
-	n = len(a[0])
-	c = np.zeros((n, n))
-	for i in range(n):
-		for j in range(n):
-			c[i][j] = a[i][j] + b[i][j]
-	return c
-
-
-def dif(a, b):
-	n = len(a[0])
-	c = np.zeros((n, n))
-	for i in range(n):
-		for j in range(n):
-			c[i][j] = a[i][j] - b[i][j]
-	return c
-			
 	
 def shtrassen(a, b):
-	n = len(a[0])
-	if n < 5:
-		array = multiply(a, b)
-		return array
+	n = np.shape(a[0])
+	if n == 1:
+		return a*b
 	else:
 		a11 = a[:n//2, :n//2]
 		a12 = a[:n//2, n//2+1:]
@@ -86,8 +57,7 @@ def main():
 	b = rightsize(inp(n))
 	c = shtrassen(a, b)
 	for i in range(n):
-		for j in range(n):
-			print(c[i][j])
+		print(" ".join(c[i]))
 		print('\n') 
 if __name__ == "__main__":
 	main()	
