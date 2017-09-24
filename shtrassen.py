@@ -18,7 +18,7 @@ def multiply(a, b):
 	for i in range(f):
 		for k in range(f):
 			for j in range(f):
-				r[i][j] += a[i][k] + b[k][j]
+				r[i][j] += a[i][k] * b[k][j]
 	return r
 	
 	
