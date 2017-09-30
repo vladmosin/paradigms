@@ -16,15 +16,14 @@ def round_to_power_of_two(n):
 
 
 def print_matrix(c):
-    n, _ = c.shape
-    for i in range(n):
-        print(*c[i])
+    for val in c:
+        print(*val)
 
 
-def input_matrix(n, k):
-    a = np.zeros((k, k), dtype=np.int)
+def input_matrix(n):
+    a = np.zeros((n, n), dtype=np.int)
     for index in range(n):
-        a[index][:n] = [int(j) for j in input().split(" ")]
+        a[index] = [int(j) for j in input().split(" ")]
     return a
 
 
@@ -49,10 +48,12 @@ def strassen(a, b):
 def main():
     n = int(input())
     k = round_to_power_of_two(n)
-    a = input_matrix(n, k)
-    b = input_matrix(n, k)
+    a = np.zeros((k, k), dtype=np.int)
+    a[:n, :n] = input_matrix(n)
+    b = np.zeros((k, k), dtype=np.int)
+    b[:n, :n] = input_matrix(n)
     c = strassen(a, b)
-    print_matrix(c[:n][:n])
+    print_matrix(c[:n, :n])
 
 
 if __name__ == "__main__":
