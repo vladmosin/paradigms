@@ -8,16 +8,17 @@ def split_matrix(a):
     return a11, a12, a21, a22
 
 
-def to_two_degree(n):
+def round_to_power_of_two(n):
     k = 1
     while k < n:
         k *= 2
     return k
 
 
-def print_matrix(c, n):
+def print_matrix(c):
+    n, _ = c.shape
     for i in range(n):
-        print(*c[i][:n])
+        print(*c[i])
 
 
 def input_matrix(n, k):
@@ -28,9 +29,9 @@ def input_matrix(n, k):
 
 
 def strassen(a, b):
-    n = np.shape(a)[0]
+    n, _ = a.shape
     if n == 1:
-        return a*b
+        return a * b
     else:
         a11, a12, a21, a22 = split_matrix(a)
         b11, b12, b21, b22 = split_matrix(b)
@@ -47,11 +48,11 @@ def strassen(a, b):
 
 def main():
     n = int(input())
-    k = to_two_degree(n)
+    k = round_to_power_of_two(n)
     a = input_matrix(n, k)
     b = input_matrix(n, k)
     c = strassen(a, b)
-    print_matrix(c, n)
+    print_matrix(c[:n][:n])
 
 
 if __name__ == "__main__":
