@@ -2,9 +2,9 @@ import numpy as np
 
 
 def split_matrix(a):
-    a1, a2 = np.hsplit(a, 2)
-    a11, a12 = np.vsplit(a1, 2)
-    a21, a22 = np.vsplit(a2, 2)
+    a1, a2 = np.vsplit(a, 2)
+    a11, a12 = np.hsplit(a1, 2)
+    a21, a22 = np.hsplit(a2, 2)
     return a11, a12, a21, a22
 
 
@@ -41,7 +41,8 @@ def strassen(a, b):
         p5 = strassen((a11 + a12), b22)
         p6 = strassen((a21 - a11), (b11 + b12))
         p7 = strassen((a12 - a22), (b21 + b22))
-        return np.vstack((np.hstack((p1 + p4 - p5 + p7, p3 + p5)), np.hstack((p2 + p4, p1 - p2 + p3 + p6))))
+        return np.vstack((np.hstack((p1 + p4 - p5 + p7, p3 + p5)),
+                          np.hstack((p2 + p4, p1 - p2 + p3 + p6))))
 
 
 def main():
