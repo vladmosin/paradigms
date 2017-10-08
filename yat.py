@@ -14,10 +14,10 @@ class Number:
 
 class Scope:
     def __init__(self, parent=None):
+        self.values = {}
         if parent is not None:
-            self = parent
-        else:
-            self = {}
+            while key in parent.values:
+                self.values[key] = parent.values[key]
 
     def __getitem__(self, key):
         if key in self.values:
@@ -67,7 +67,7 @@ class Print:
 
     def evaluate(self, scope):
         print(self.expr.evaluate(scope))
-    return self.expr.evaluate(scope)
+        return self.expr.evaluate(scope)
 
 
 class Read:
@@ -166,7 +166,7 @@ class BinaryOperation:
                 return Number(1)
             else:
                 return Number(0)
-    return Number(0)
+        return Number(0)
 
 
 class UnaryOperation:
