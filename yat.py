@@ -56,12 +56,19 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false is None:
+            if self.if_false is None or not self.if_false:
                 return Number(0)
             else:
-                return self.if_false.evaluate(scope)
+                for statement in self.if_false:
+                    res = statement.evaluate(scope)
+                return res
         else:
-            return self.if_true.evaluate(scope)
+            if not self.if_true:
+                return Number(0)
+            else:
+                for statement in self.if_true:
+                    res = statement.evaluate(scope)
+                return res
 
 
 class Print:
@@ -90,11 +97,13 @@ class FunctionCall:
         self.args = args
 
     def evaluate(self, scope):
-        function = fun_expr(scope)
+        function = self.fun_expr.evaluate(scope)
         call_scope = Scope(scope)
-        while arg in function.args and value in args:
-            scope[arg] = value
-        return function.evaluate(call_scope)
+        for arg, value in zip(function.args, self.args):
+            call_scope[arg] = value.evaluate(scope)
+        for state in function.body:
+            res = state.evaluate(call_scope)
+        return res
 
 
 class Reference:
@@ -210,11 +219,22 @@ def main():
     value = Read("read").evaluate(scope)
     scope['var'] = Number(8)
     Print(value).evaluate(parent)
-    cond_check = Conditional(Number(5),
+    cond_check = Conditional(Number(5), [
                              BinaryOperation(Reference('var'), '-',
-                                             Number(-5)))
+                                             Number(-5))
+                             ])
     cond_check_result = cond_check.evaluate(scope)
     Print(cond_check_result).evaluate(scope)
+    operation1 = FunctionDefinition('summer', Function(['a', 'b'], [
+            Print(BinaryOperation(Reference('a'), '+', Reference('b'))),
+            BinaryOperation(Reference('a'), '+', Reference('b'))
+    ]))
+    operation2 = FunctionCall(Reference('summer'), [
+        Number(1),
+        BinaryOperation(Number(2), '+', Number(3))
+    ])
+    operation1.evaluate(scope)
+    operation2.evaluate(scope)
 
 
 if __name__ == "__main__":
