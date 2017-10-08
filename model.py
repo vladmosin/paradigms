@@ -75,8 +75,12 @@ class Print:
 
     def evaluate(self, scope):
         num = self.expr.evaluate(scope)
-        print(num.value)
-        return num
+        if type(num) == int:
+            print(num)
+            return Number(num)
+        else:
+            print(num.value)
+            return num
 
 
 class Read:
