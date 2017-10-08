@@ -5,9 +5,6 @@ class Number:
     def evaluate(self, scope):
         return self
 
-    def __repr__(self):
-        return "Number({})".format(self.value)
-
     def __hash__(self):
         return hash(self.value)
 
@@ -242,10 +239,12 @@ def main():
           Number(4), '-', Number(4)), [], [
           BinaryOperation(Number(9), '/', Number(3)), Reference('var')
           ])).evaluate(scope)
-    operation3 = FunctionDefinition('abs', Function(['a', 'b'],[
-        Conditional(BinaryOperation(BinaryOperation(Reference('a'), '-', Reference('b')), '>', Number(0)), [
-            Print(BinaryOperation(Reference('a'), '-', Reference('b')))
-        ], [
+    operation3 = FunctionDefinition('abs', Function(['a', 'b'], [
+        Conditional(BinaryOperation(BinaryOperation(Reference('a'), '-',
+                    Reference('b')), '>', Number(0)),
+                    [
+                    Print(BinaryOperation(Reference('a'), '-', Reference('b')))
+                    ], [
             Print(BinaryOperation(Reference('b'), '-', Reference('a')))
         ])
     ]))
@@ -260,9 +259,6 @@ def main():
     operation3.evaluate(scope)
     operation4.evaluate(scope)
 
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
