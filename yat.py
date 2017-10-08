@@ -210,7 +210,9 @@ def main():
     value = Read("read").evaluate(scope)
     scope['var'] = Number(8)
     Print(value).evaluate(parent)
-    cond_check = Conditional(Number(5), BinaryOperation(Reference('var'), '-', Number(-5)))
+    cond_check = Conditional(Number(5),
+                             BinaryOperation(Reference('var'), '-',
+                                             Number(-5)))
     cond_check_result = cond_check.evaluate(scope)
     Print(cond_check_result).evaluate(scope)
 
