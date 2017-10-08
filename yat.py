@@ -5,6 +5,9 @@ class Number:
     def evaluate(self, scope):
         return self
 
+    def __repr__(self):
+        return "Number({})".format(self.value)
+
     def __hash__(self):
         return hash(self.value)
 
@@ -16,7 +19,7 @@ class Scope:
     def __init__(self, parent=None):
         self.values = {}
         if parent is not None:
-            while key in parent.values:
+            for key in parent.values:
                 self.values[key] = parent.values[key]
 
     def __getitem__(self, key):
@@ -32,7 +35,7 @@ class Function:
         self.args = args
         self.body = body
 
-    def evaluate():
+    def evaluate(self, scope):
         return self
 
 
@@ -52,13 +55,13 @@ class Conditional:
         self.if_false = if_false
 
     def evaluate(self, scope):
-        if condition.evaluate(scope).value == 0:
-            if if_true is None:
+        if self.condition.evaluate(scope).value == 0:
+            if self.if_false is None:
                 return Number(0)
             else:
-                return if_false.evaluate(scope)
+                return self.if_false.evaluate(scope)
         else:
-            return if_true.evaluate
+            return self.if_true.evaluate(scope)
 
 
 class Print:
@@ -66,8 +69,9 @@ class Print:
         self.expr = expr
 
     def evaluate(self, scope):
-        print(self.expr.evaluate(scope))
-        return self.expr.evaluate(scope)
+        num = self.expr.evaluate(scope)
+        print(num)
+        return num
 
 
 class Read:
@@ -75,7 +79,9 @@ class Read:
         self.name = name
 
     def evaluate(self, scope):
-        return Number(int(input()))
+        value = int(input())
+        scope[self.name] = value
+        return Number(value)
 
 
 class FunctionCall:
@@ -96,7 +102,7 @@ class Reference:
         self.name = name
 
     def evaluate(self, scope):
-        return scope[name]
+        return scope[self.name]
 
 
 class BinaryOperation:
@@ -142,27 +148,32 @@ class BinaryOperation:
             else:
                 return Number(0)
         if self.op == "<=":
-            if self.lhs.evaluate(scope).value <= self.rhs.evaluate(scope).value:
+            if self.lhs.evaluate(scope).value <=\
+               self.rhs.evaluate(scope).value:
                 return Number(1)
             else:
                 return Number(0)
         if self.op == ">=":
-            if self.lhs.evaluate(scope).value >= self.rhs.evaluate(scope).value:
+            if self.lhs.evaluate(scope).value >=\
+               self.rhs.evaluate(scope).value:
                 return Number(1)
             else:
                 return Number(0)
         if self.op == "<":
-            if self.lhs.evaluate(scope).value < self.rhs.evaluate(scope).value:
+            if self.lhs.evaluate(scope).value <\
+               self.rhs.evaluate(scope).value:
                 return Number(1)
             else:
                 return Number(0)
         if self.op == "&&":
-            if self.lhs.evaluate(scope).value != 0 and self.rhs.evaluate(scope).value != 0:
+            if self.lhs.evaluate(scope).value != 0 and\
+               self.rhs.evaluate(scope).value != 0:
                 return Number(1)
             else:
                 return Number(0)
         if self.op == "||":
-            if self.lhs.evaluate(scope).value != 0 or self.rhs.evaluate(scope).value != 0:
+            if self.lhs.evaluate(scope).value != 0 or\
+               self.rhs.evaluate(scope).value != 0:
                 return Number(1)
             else:
                 return Number(0)
@@ -182,3 +193,27 @@ class UnaryOperation:
                 return Number(0)
             else:
                 return Number(1)
+        return Number(0)
+
+
+def main():
+    parent = Scope()
+    Print(UnaryOperation('-', Number(10))).evaluate(parent)
+    parent['foo'] = Number(10)
+    program = BinaryOperation(BinaryOperation(
+                              Reference('foo'), '+',
+                              Number(7)), '*', Number(2))
+    result = program.evaluate(parent)
+    Print(result).evaluate(parent)
+    scope = Scope(parent)
+    Print(parent['foo']).evaluate(scope)
+    value = Read("read").evaluate(scope)
+    scope['var'] = Number(8)
+    Print(value).evaluate(parent)
+    cond_check = Conditional(Number(5), BinaryOperation(Reference('var'), '-', Number(-5)))
+    cond_check_result = cond_check.evaluate(scope)
+    Print(cond_check_result).evaluate(scope)
+
+
+if __name__ == "__main__":
+    main()
