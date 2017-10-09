@@ -22,6 +22,8 @@ class Scope:
     def __getitem__(self, key):
         if key in self.values:
             return self.values[key]
+        elif self.parent:
+            return self.parent[key]
 
     def __setitem__(self, key, value):
         self.values[key] = value
