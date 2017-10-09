@@ -11,9 +11,6 @@ class Number:
     def __eq__(self, other):
         return self.value == other.value
 
-    def __bool__(self):
-        return self.value != 0
-
 
 class Scope:
     def __init__(self, parent=None):
@@ -112,20 +109,19 @@ class BinaryOperation:
     def evaluate(self, scope):
         left = self.lhs.evaluate(scope).value
         right = self.rhs.evaluate(scope).value
-        d = { '+': left + right,
-              '-': left - right,
-              '*': left * right,
-              '/': left // right if right != 0 else 0,
-              '%': left % right if right != 0 else 0,
-              '==': left == right,
-              '!=': left != right,
-              '<': left < right,
-              '>': left > right,
-              '<=': left <= right,
-              '>=': left >= right,
-              '&&': lambda x, y: bool(x) and bool(y),
-              '||': lambda x, y: bool(x) or bool(y)
-             }
+        d = {'+': left + right,
+             '-': left - right,
+             '*': left * right,
+             '/': left // right if right != 0 else 0,
+             '%': left % right if right != 0 else 0,
+             '==': left == right,
+             '!=': left != right,
+             '<': left < right,
+             '>': left > right,
+             '<=': left <= right,
+             '>=': left >= right,
+             '&&': 0 if right == 0 and left == 0 else 1,
+             '||': 0 if right == 0 or left == 0 else 1}
         return Number(d[self.op])
 
 
@@ -135,14 +131,10 @@ class UnaryOperation:
         self.expr = expr
 
     def evaluate(self, scope):
-        if self.op == "-":
-            return Number(0 - self.expr.evaluate(scope).value)
-        if self.op == "!":
-            if self.expr.evaluate(scope).value != 0:
-                return Number(0)
-            else:
-                return Number(1)
-        return Number(0)
+        expression = self.expr.evaluate(scope).value
+        d = {'-': 0 - expression,
+             '!': 0 if expression == 0 else 1}
+        return Number(d[self.op])
 
 
 def result(expr, scope):
@@ -150,6 +142,7 @@ def result(expr, scope):
         for statement in expr:
             res = statement.evaluate(scope)
         return res
+
 
 def main():
     parent = Scope()
@@ -205,6 +198,8 @@ def main():
     operation6.evaluate(scope)
     operation3.evaluate(scope)
     operation4.evaluate(scope)
+    Print(Conditional(BinaryOperation(Number(5), '||', Number(0)), [], [])).evaluate(scope)
+    Print(BinaryOperation(Number(5), '&&', Number(6))).evaluate(scope)
 
 
 if __name__ == "__main__":
