@@ -198,7 +198,6 @@ def main():
     operation6.evaluate(scope)
     operation3.evaluate(scope)
     operation4.evaluate(scope)
-    Print(Conditional(BinaryOperation(Number(5), '||', Number(0)), [], [])).evaluate(scope)
     Print(BinaryOperation(Number(5), '&&', Number(6))).evaluate(scope)
 
 
