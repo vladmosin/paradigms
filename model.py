@@ -11,13 +11,14 @@ class Number:
     def __eq__(self, other):
         return self.value == other.value
 
+    def __bool__(self):
+        return self.value != 0
+
 
 class Scope:
     def __init__(self, parent=None):
+        self.parent = parent
         self.values = {}
-        if parent is not None:
-            for key in parent.values:
-                self.values[key] = parent.values[key]
 
     def __getitem__(self, key):
         if key in self.values:
@@ -56,19 +57,9 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false is None or not self.if_false:
-                return Number(0)
-            else:
-                for statement in self.if_false:
-                    res = statement.evaluate(scope)
-                return res
+            return result(self.if_false, scope)
         else:
-            if not self.if_true:
-                return Number(0)
-            else:
-                for statement in self.if_true:
-                    res = statement.evaluate(scope)
-                return res
+            return result(self.if_true, scope)
 
 
 class Print:
@@ -101,10 +92,7 @@ class FunctionCall:
         call_scope = Scope(scope)
         for arg, value in zip(function.args, self.args):
             call_scope[arg] = value.evaluate(scope)
-        res = Number(0)
-        for state in function.body:
-            res = state.evaluate(call_scope)
-        return res
+        return result(function.body, call_scope)
 
 
 class Reference:
@@ -122,72 +110,23 @@ class BinaryOperation:
         self.lhs = lhs
 
     def evaluate(self, scope):
-        if self.op == "+":
-            return Number(self.lhs.evaluate(scope).value +
-                          self.rhs.evaluate(scope).value)
-        if self.op == "-":
-            return Number(self.lhs.evaluate(scope).value -
-                          self.rhs.evaluate(scope).value)
-        if self.op == "*":
-            return Number(self.lhs.evaluate(scope).value *
-                          self.rhs.evaluate(scope).value)
-        if self.op == "/":
-            return Number(self.lhs.evaluate(scope).value //
-                          self.rhs.evaluate(scope).value)
-        if self.op == "%":
-            return Number(self.lhs.evaluate(scope).value %
-                          self.rhs.evaluate(scope).value)
-        if self.op == "==":
-            if self.lhs.evaluate(scope) == self.rhs.evaluate(scope):
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == "!=":
-            if self.lhs.evaluate(scope) == self.rhs.evaluate(scope):
-                return Number(0)
-            else:
-                return Number(1)
-        if self.op == "<":
-            if self.lhs.evaluate(scope).value < self.rhs.evaluate(scope).value:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == ">":
-            if self.lhs.evaluate(scope).value > self.rhs.evaluate(scope).value:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == "<=":
-            if self.lhs.evaluate(scope).value <=\
-               self.rhs.evaluate(scope).value:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == ">=":
-            if self.lhs.evaluate(scope).value >=\
-               self.rhs.evaluate(scope).value:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == "<":
-            if self.lhs.evaluate(scope).value <\
-               self.rhs.evaluate(scope).value:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == "&&":
-            if self.lhs.evaluate(scope).value != 0 and\
-               self.rhs.evaluate(scope).value != 0:
-                return Number(1)
-            else:
-                return Number(0)
-        if self.op == "||":
-            if self.lhs.evaluate(scope).value != 0 or\
-               self.rhs.evaluate(scope).value != 0:
-                return Number(1)
-            else:
-                return Number(0)
-        return Number(0)
+        left = self.lhs.evaluate(scope).value
+        right = self.rhs.evaluate(scope).value
+        d = { '+': left + right,
+              '-': left - right,
+              '*': left * right,
+              '/': left // right if right != 0 else 0,
+              '%': left % right if right != 0 else 0,
+              '==': left == right,
+              '!=': left != right,
+              '<': left < right,
+              '>': left > right,
+              '<=': left <= right,
+              '>=': left >= right,
+              '&&': lambda x, y: bool(x) and bool(y),
+              '||': lambda x, y: bool(x) or bool(y)
+             }
+        return Number(d[self.op])
 
 
 class UnaryOperation:
@@ -205,6 +144,12 @@ class UnaryOperation:
                 return Number(1)
         return Number(0)
 
+
+def result(expr, scope):
+        res = Number(0)
+        for statement in expr:
+            res = statement.evaluate(scope)
+        return res
 
 def main():
     parent = Scope()
