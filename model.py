@@ -114,12 +114,12 @@ class BinaryOperation:
              '*': left * right,
              '/': left // right if right != 0 else 0,
              '%': left % right if right != 0 else 0,
-             '==': left == right,
-             '!=': left != right,
-             '<': left < right,
-             '>': left > right,
-             '<=': left <= right,
-             '>=': left >= right,
+             '==': 1 if left == right else 0,
+             '!=': 1 if left != right else 0,
+             '<': 1 if left < right else 0,
+             '>': 1 if left > right else 0,
+             '<=': 1 if left <= right else 0,
+             '>=': 1 if left >= right else 0,
              '&&': 0 if right == 0 and left == 0 else 1,
              '||': 0 if right == 0 or left == 0 else 1}
         return Number(d[self.op])
@@ -199,6 +199,7 @@ def main():
     operation3.evaluate(scope)
     operation4.evaluate(scope)
     Print(BinaryOperation(Number(5), '&&', Number(6))).evaluate(scope)
+    Print(BinaryOperation(Number(3), '<', Number(5))).evaluate(scope)
 
 
 if __name__ == "__main__":
