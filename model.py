@@ -20,7 +20,7 @@ class Scope:
     def __getitem__(self, key):
         if key in self.values:
             return self.values[key]
-        else:
+        elif self.parent:
             return self.parent[key]
 
     def __setitem__(self, key, value):
@@ -54,19 +54,9 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false is None or not self.if_false:
-                return Number(0)
-            else:
-                for statement in self.if_false:
-                    res = statement.evaluate(scope)
-                return res
+            return result(self.if_false, scope)
         else:
-            if not self.if_true:
-                return Number(0)
-            else:
-                for statement in self.if_true:
-                    res = statement.evaluate(scope)
-                return res
+            return result(self.if_true, scope)
 
 
 class Print:
@@ -99,10 +89,7 @@ class FunctionCall:
         call_scope = Scope(scope)
         for arg, value in zip(function.args, self.args):
             call_scope[arg] = value.evaluate(scope)
-        res = Number(0)
-        for state in function.body:
-            res = state.evaluate(call_scope)
-        return res
+        return result(function.body, call_scope)
 
 
 class Reference:
@@ -134,7 +121,7 @@ class BinaryOperation:
              '<=': 1 if left <= right else 0,
              '>=': 1 if left >= right else 0,
              '&&': 0 if right == 0 and left == 0 else 1,
-             '||': 0 if right == 0 or left == 0 else 1}
+             '||': 1 if right != 0 or left != 0 else 0}
         return Number(d[self.op])
 
 
@@ -146,8 +133,16 @@ class UnaryOperation:
     def evaluate(self, scope):
         expression = self.expr.evaluate(scope).value
         d = {'-': 0 - expression,
-             '!': 0 if expression == 0 else 1}
+             '!': 1 if expression == 0 else 0}
         return Number(d[self.op])
+
+
+def result(expr, scope):
+        res = Number(0)
+        if expr:
+            for statement in expr:
+                res = statement.evaluate(scope)
+        return res
 
 
 def main():
@@ -204,6 +199,9 @@ def main():
     operation6.evaluate(scope)
     operation3.evaluate(scope)
     operation4.evaluate(scope)
+    Print(BinaryOperation(Number(5), '&&', Number(6))).evaluate(scope)
+    Print(BinaryOperation(Number(3), '<', Number(5))).evaluate(scope)
+    Print(Conditional(Number(3), None, None)).evaluate(scope)
 
 
 if __name__ == "__main__":
