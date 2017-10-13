@@ -1,3 +1,6 @@
+import operator as op
+
+
 class Number:
     def __init__(self, value):
         self.value = value
@@ -11,6 +14,9 @@ class Number:
     def __eq__(self, other):
         return self.value == other.value
 
+    def __bool__(self, other):
+        return self.value == other.value
+
 
 class Scope:
     def __init__(self, parent=None):
@@ -20,7 +26,7 @@ class Scope:
     def __getitem__(self, key):
         if key in self.values:
             return self.values[key]
-        elif self.parent:
+        else:
             return self.parent[key]
 
     def __setitem__(self, key, value):
@@ -54,9 +60,9 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            return result(self.if_false, scope)
+            return calc_list(self.if_false, scope)
         else:
-            return result(self.if_true, scope)
+            return calc_list(self.if_true, scope)
 
 
 class Print:
@@ -76,7 +82,7 @@ class Read:
     def evaluate(self, scope):
         value = int(input())
         scope[self.name] = Number(value)
-        return Number(value)
+        return scope[self.name]
 
 
 class FunctionCall:
@@ -89,7 +95,7 @@ class FunctionCall:
         call_scope = Scope(scope)
         for arg, value in zip(function.args, self.args):
             call_scope[arg] = value.evaluate(scope)
-        return result(function.body, call_scope)
+        return calc_list(function.body, call_scope)
 
 
 class Reference:
@@ -101,6 +107,20 @@ class Reference:
 
 
 class BinaryOperation:
+    d = {'+': op.add,
+         '-': op.sub,
+         '*': op.mul,
+         '/': op.floordiv,
+         '%': op.mod,
+         '==': op.eq,
+         '!=': op.ne,
+         '<': op.lt,
+         '>': op.gt,
+         '<=': op.le,
+         '>=': op.ge,
+         '&&': lambda x, y: bool(x) and bool(y),
+         '||': lambda x, y: bool(x) or bool(y)}
+
     def __init__(self, lhs, op, rhs):
         self.rhs = rhs
         self.op = op
@@ -109,35 +129,24 @@ class BinaryOperation:
     def evaluate(self, scope):
         left = self.lhs.evaluate(scope).value
         right = self.rhs.evaluate(scope).value
-        d = {'+': left + right,
-             '-': left - right,
-             '*': left * right,
-             '/': left // right if right != 0 else 0,
-             '%': left % right if right != 0 else 0,
-             '==': 1 if left == right else 0,
-             '!=': 1 if left != right else 0,
-             '<': 1 if left < right else 0,
-             '>': 1 if left > right else 0,
-             '<=': 1 if left <= right else 0,
-             '>=': 1 if left >= right else 0,
-             '&&': 0 if right == 0 and left == 0 else 1,
-             '||': 1 if right != 0 or left != 0 else 0}
-        return Number(d[self.op])
+        return Number(int(self.d[self.op](left, right)))
 
 
 class UnaryOperation:
+
+    d = {'-': lambda x: 0 - x,
+         '!': lambda x: not bool(x)}
+
     def __init__(self, op, expr):
         self.op = op
         self.expr = expr
 
     def evaluate(self, scope):
         expression = self.expr.evaluate(scope).value
-        d = {'-': 0 - expression,
-             '!': 1 if expression == 0 else 0}
-        return Number(d[self.op])
+        return Number(int(self.d[self.op](expression)))
 
 
-def result(expr, scope):
+def calc_list(expr, scope):
         res = Number(0)
         if expr:
             for statement in expr:
@@ -202,6 +211,8 @@ def main():
     Print(BinaryOperation(Number(5), '&&', Number(6))).evaluate(scope)
     Print(BinaryOperation(Number(3), '<', Number(5))).evaluate(scope)
     Print(Conditional(Number(3), None, None)).evaluate(scope)
+    Print(BinaryOperation(Number(1), '||', Number(4))).evaluate(scope)
+    Print(BinaryOperation(Number(1), '||', Number(0))).evaluate(scope)
 
 
 if __name__ == "__main__":
