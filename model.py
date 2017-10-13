@@ -60,9 +60,9 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            return calc_list(self.if_false, scope)
+            return evaluate_list(self.if_false, scope)
         else:
-            return calc_list(self.if_true, scope)
+            return evaluate_list(self.if_true, scope)
 
 
 class Print:
@@ -95,7 +95,7 @@ class FunctionCall:
         call_scope = Scope(scope)
         for arg, value in zip(function.args, self.args):
             call_scope[arg] = value.evaluate(scope)
-        return calc_list(function.body, call_scope)
+        return evaluate_list(function.body, call_scope)
 
 
 class Reference:
@@ -107,19 +107,19 @@ class Reference:
 
 
 class BinaryOperation:
-    d = {'+': op.add,
-         '-': op.sub,
-         '*': op.mul,
-         '/': op.floordiv,
-         '%': op.mod,
-         '==': op.eq,
-         '!=': op.ne,
-         '<': op.lt,
-         '>': op.gt,
-         '<=': op.le,
-         '>=': op.ge,
-         '&&': lambda x, y: bool(x) and bool(y),
-         '||': lambda x, y: bool(x) or bool(y)}
+    BINARY_OPERATIONS = {'+': op.add,
+                         '-': op.sub,
+                         '*': op.mul,
+                         '/': op.floordiv,
+                         '%': op.mod,
+                         '==': op.eq,
+                         '!=': op.ne,
+                         '<': op.lt,
+                         '>': op.gt,
+                         '<=': op.le,
+                         '>=': op.ge,
+                         '&&': lambda x, y: x and y,
+                         '||': lambda x, y: x or y}
 
     def __init__(self, lhs, op, rhs):
         self.rhs = rhs
@@ -129,13 +129,13 @@ class BinaryOperation:
     def evaluate(self, scope):
         left = self.lhs.evaluate(scope).value
         right = self.rhs.evaluate(scope).value
-        return Number(int(self.d[self.op](left, right)))
+        return Number(int(self.BINARY_OPERATIONS[self.op](left, right)))
 
 
 class UnaryOperation:
 
-    d = {'-': lambda x: 0 - x,
-         '!': lambda x: not bool(x)}
+    UNARY_OPERATIONS = {'-': lambda x: 0 - x,
+                        '!': lambda x: not bool(x)}
 
     def __init__(self, op, expr):
         self.op = op
@@ -143,14 +143,13 @@ class UnaryOperation:
 
     def evaluate(self, scope):
         expression = self.expr.evaluate(scope).value
-        return Number(int(self.d[self.op](expression)))
+        return Number(int(self.UNARY_OPERATIONS[self.op](expression)))
 
 
-def calc_list(expr, scope):
+def evaluate_list(expr, scope):
         res = Number(0)
-        if expr:
-            for statement in expr:
-                res = statement.evaluate(scope)
+        for statement in (expr or []):
+            res = statement.evaluate(scope)
         return res
 
 
