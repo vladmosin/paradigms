@@ -2,26 +2,29 @@ import yat.model as m
 
 
 class ConstantFolder:
-    spaces = 0
-    oper = 0
-    scope = m.Scope()
+    def __init__(self):
+        self.oper = 0
+        self.scope = m.Scope()
+
     def visit(self, tree):
         self.oper = 0
-        return "{};".format(tree.accept(self))
+        return "{}".format(tree.accept(self))
 
     def visitNumber(self, number):
-        return str(number.value)
+        return "Number({})".format(number.value)
 
     def visitReference(self, reference):
         self.oper = 1
-        return reference.name
+        return "Reference(\'{}\')".format(reference.name)
 
     def visitUnaryOperation(self, unary_operation):
         current_oper = self.oper
         self.oper = 0
-        string_to_return = "{}({})".format(unary_operation.op, unary_operation.expr.accept(self))
+        string_to_return = "UnaryOperation(\'{}\', {})".format(
+                unary_operation.op, unary_operation.expr.accept(self))
         if self.oper == 0:
-            return str(unary_operation.evaluate(self.scope).value)
+            return "Number({})".format(
+                unary_operation.evaluate(self.scope).value)
         return string_to_return
 
     def visitBinaryOperation(self, binary_operation):
@@ -36,52 +39,59 @@ class ConstantFolder:
         count_rhs = self.oper
         self.oper = max(count_lhs, count_rhs)
         if self.oper == 0:
-            return str(binary_operation.evaluate(self.scope).value)
+            return "Number({})".format(
+                binary_operation.evaluate(self.scope).value)
         else:
             if count_rhs == 0:
-                if binary_operation.rhs.evaluate(self.scope).value == 0 and type(binary_operation.lhs) == m.Reference and binary_operation.op == "*":
+                if binary_operation.rhs.evaluate(self.scope).value == 0 and\
+                   type(binary_operation.lhs) == m.Reference and\
+                   binary_operation.op == "*":
                     self.oper = 0
                     binary_operation.lhs = m.Number(0)
-                    return "0"
+                    return "Number(0)"
             if count_lhs == 0:
-                if binary_operation.lhs.evaluate(self.scope).value == 0 and type(binary_operation.rhs) == m.Reference and binary_operation.op == "*":
+                if binary_operation.lhs.evaluate(self.scope).value == 0 and\
+                   type(binary_operation.rhs) == m.Reference and\
+                   binary_operation.op == "*":
                     self.oper = 0
                     binary_operation.rhs = m.Number(0)
-                    return "0"
-            if type(binary_operation.lhs) == m.Reference and type(binary_operation.rhs) == m.Reference and binary_operation.op == "-":
+                    return "Number(0)"
+            if type(binary_operation.lhs) == m.Reference and\
+               type(binary_operation.rhs) == m.Reference and\
+               binary_operation.op == "-":
                 if binary_operation.lhs.name == binary_operation.rhs.name:
                     self.oper = 0
-                    binary_operation.lhs = m.Number(0) 
-                    binary_operation.rhs = m.Number(0) 
-                    return "0"
-        return "({} {} {})".format(str_lhs, binary_operation.op, str_rhs)
+                    binary_operation.lhs = m.Number(0)
+                    binary_operation.rhs = m.Number(0)
+                    return "Number(0)"
+        return "BinaryOperation({}, \'{}\', {})".format(
+                str_lhs, binary_operation.op, str_rhs)
 
     def visitFunctionDefinition(self, func_def):
-        args = ""
-        for arg in func_def.function.args:
-            if args == "":
-                args += arg
-            else:
-                args += ", " + arg
-        string_to_return = "def {}({}) {}\n".format(func_def.name, args, "{")
-        self.spaces += 4
+        body = ""
         for statement in func_def.function.body or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, statement.accept(self))
-        self.spaces -= 4
-        string_to_return += "{}{}".format(" " * self.spaces, '}');
-        return string_to_return
+            if len(body) == 0:
+                body += statement.accept(self)
+            else:
+                body += ", {}".format(statement.accept(self))
+        return "FunctionDefinition(\'{}\', Function({}, [{}])".format(
+                    func_def.name, func_def.function.args, body)
 
     def visitConditional(self, conditional):
-        string_to_return = "if ({}) {}\n".format(conditional.condition.accept(self), '{')
-        self.spaces += 4
+        true_string = ""
+        false_string = ""
         for true_statement in conditional.if_true or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, true_statement.accept(self))
-        string_to_return += "{}{} else {}\n".format(" " * (self.spaces - 4), '}', '{');
+            if len(true_string) == 0:
+                true_string += true_statement.accept(self)
+            else:
+                true_string += ", {}".format(true_statement.accept(self))
         for false_statement in conditional.if_false or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, false_statement.accept(self))
-        self.spaces -= 4
-        string_to_return += "{}{}".format(" " * self.spaces, '}');
-        return string_to_return
+            if len(false_string) == 0:
+                false_string += false_statement.accept(self)
+            else:
+                false_string += ", {}".format(false_statement.accept(self))
+        return "Conditional({}, [{}], [{}])".format(
+                conditional.condition.accept(self), true_string, false_string)
 
     def visitFunctionCall(self, func_call):
         self.oper = 1
@@ -91,13 +101,14 @@ class ConstantFolder:
                 string_of_args += arg.accept(self)
             else:
                 string_of_args += ", " + arg.accept(self)
-        return "{}({})".format(func_call.fun_expr.accept(self), string_of_args)
+        return "FunctionCall({}, [{}])".format(
+                func_call.fun_expr.accept(self), string_of_args)
 
     def visitPrint(self, print_expr):
-        return "print {}".format(print_expr.expr.accept(self))
+        return "Print({})".format(print_expr.expr.accept(self))
 
     def visitRead(self, read_expr):
-        return "read {}".format(read_expr.name)
+        return "Read(\'{}\')".format(read_expr.name)
 
 
 def main():
@@ -110,10 +121,11 @@ def main():
     print(v.visit(m.Read("read")))
     print(v.visit(m.Conditional(m.Number(5), [
                              m.BinaryOperation(m.Reference('var'), '-',
-                                             m.Number(-5))
+                                m.Number(-5))
                              ])))
     print(v.visit(m.FunctionDefinition('summer', m.Function(['a', 'b'], [
-            m.Print(m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))),
+            m.Print(m.BinaryOperation(m.Reference('a'), '+',
+                                      m.Reference('b'))),
             m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))
     ]))))
     print(v.visit(m.FunctionCall(m.Reference('summer'), [
@@ -125,10 +137,11 @@ def main():
           m.BinaryOperation(m.Number(9), '/', m.Number(3)), m.Reference('var')
           ]))))
     print(v.visit(m.FunctionDefinition('abs', m.Function(['a', 'b'], [
-        m.Conditional(m.BinaryOperation(m.BinaryOperation(m.Reference('a'), '-',
-                    m.Reference('b')), '>', m.Number(0)),
-                    [
-                    m.Print(m.BinaryOperation(m.Reference('a'), '-', m.Reference('b')))
+        m.Conditional(m.BinaryOperation(
+                      m.BinaryOperation(m.Reference('a'), '-',
+                                        m.Reference('b')), '>', m.Number(0)), [
+                    m.Print(m.BinaryOperation(m.Reference('a'), '-',
+                                              m.Reference('b')))
                     ], [
             m.Print(m.BinaryOperation(m.Reference('b'), '-', m.Reference('a')))
         ])
@@ -146,4 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        

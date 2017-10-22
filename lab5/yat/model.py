@@ -155,6 +155,7 @@ class BinaryOperation:
     def accept(self, visitor):
         return visitor.visitBinaryOperation(self)
 
+
 class UnaryOperation:
     OPERATIONS = {'-': lambda x: -x,
                   '!': lambda x: not bool(x)}

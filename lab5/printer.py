@@ -2,11 +2,11 @@ import yat.model as m
 
 
 class PrettyPrinter:
-    spaces = 0
+    def __init__(self):
+        self.spaces = 0
 
     def visit(self, tree):
         print("{};".format(tree.accept(self)))
-
 
     def visitNumber(self, number):
         return str(number.value)
@@ -15,10 +15,13 @@ class PrettyPrinter:
         return reference.name
 
     def visitUnaryOperation(self, unary_operation):
-        return "{}({})".format(unary_operation.op, unary_operation.expr.accept(self))
+        return "{}({})".format(unary_operation.op,
+                               unary_operation.expr.accept(self))
 
     def visitBinaryOperation(self, binary_operation):
-        return "({} {} {})".format(binary_operation.lhs.accept(self), binary_operation.op, binary_operation.rhs.accept(self))
+        return "({} {} {})".format(binary_operation.lhs.accept(self),
+                                   binary_operation.op,
+                                   binary_operation.rhs.accept(self))
 
     def visitFunctionDefinition(self, func_def):
         args = ""
@@ -30,21 +33,26 @@ class PrettyPrinter:
         string_to_return = "def {}({}) {}\n".format(func_def.name, args, "{")
         self.spaces += 4
         for statement in func_def.function.body or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, statement.accept(self))
+            string_to_return += "{}{};\n".format(" " * self.spaces,
+                                                 statement.accept(self))
         self.spaces -= 4
-        string_to_return += "{}{}".format(" " * self.spaces, '}');
+        string_to_return += "{}{}".format(" " * self.spaces, '}')
         return string_to_return
 
     def visitConditional(self, conditional):
-        string_to_return = "if ({}) {}\n".format(conditional.condition.accept(self), '{')
+        string_to_return = "if ({}) {}\n".format(
+            conditional.condition.accept(self), '{')
         self.spaces += 4
         for true_statement in conditional.if_true or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, true_statement.accept(self))
-        string_to_return += "{}{} else {}\n".format(" " * (self.spaces - 4), '}', '{');
+            string_to_return += "{}{};\n".format(" " * self.spaces,
+                                                 true_statement.accept(self))
+        string_to_return += "{}{} else {}\n".format(
+                    " " * (self.spaces - 4), '}', '{')
         for false_statement in conditional.if_false or []:
-            string_to_return += "{}{};\n".format(" " * self.spaces, false_statement.accept(self))
+            string_to_return += "{}{};\n".format(" " * self.spaces,
+                                                 false_statement.accept(self))
         self.spaces -= 4
-        string_to_return += "{}{}".format(" " * self.spaces, '}');
+        string_to_return += "{}{}".format(" " * self.spaces, '}')
         return string_to_return
 
     def visitFunctionCall(self, func_call):
@@ -73,12 +81,12 @@ def main():
     v.visit(m.Read("read"))
     v.visit(m.Conditional(m.Number(5), [
                              m.BinaryOperation(m.Reference('var'), '-',
-                                             m.Number(-5))
+                                               m.Number(-5))
                              ]))
     v.visit(m.FunctionDefinition('summer', m.Function(['a', 'b'], [
-            m.Print(m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))),
-            m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))
-    ])))
+            m.Print(m.BinaryOperation(m.Reference('a'), '+',
+                                      m.Reference('b'))),
+            m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))])))
     v.visit(m.FunctionCall(m.Reference('summer'), [
         m.Number(1),
         m.BinaryOperation(m.Number(2), '+', m.Number(3))
@@ -88,10 +96,10 @@ def main():
           m.BinaryOperation(m.Number(9), '/', m.Number(3)), m.Reference('var')
           ])))
     v.visit(m.FunctionDefinition('abs', m.Function(['a', 'b'], [
-        m.Conditional(m.BinaryOperation(m.BinaryOperation(m.Reference('a'), '-',
-                    m.Reference('b')), '>', m.Number(0)),
-                    [
-                    m.Print(m.BinaryOperation(m.Reference('a'), '-', m.Reference('b')))
+        m.Conditional(m.BinaryOperation(m.BinaryOperation(m.Reference('a'),
+                      '-', m.Reference('b')), '>', m.Number(0)), [
+                    m.Print(m.BinaryOperation(m.Reference('a'), '-',
+                                              m.Reference('b')))
                     ], [
             m.Print(m.BinaryOperation(m.Reference('b'), '-', m.Reference('a')))
         ])
