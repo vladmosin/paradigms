@@ -18,8 +18,9 @@ class ConstantFolder:
     def visitUnaryOperation(self, unary_operation):
         expr = unary_operation.expr.accept(self)
         if type(expr) == m.Number:
-            return unary_operation.evaluate(self.scope)
-        return unary_operation
+            return m.UnaryOperation(unary_operation.op,
+                                    expr).evaluate(self.scope)
+        return m.sUnaryOperation(unary_operation.op, expr)
 
     def visitBinaryOperation(self, binary_operation):
         lhs = binary_operation.lhs.accept(self)
@@ -31,20 +32,16 @@ class ConstantFolder:
            type(lhs) == m.Reference and\
            binary_operation.op == "*":
             if rhs.value == 0:
-                binary_operation.lhs = m.Number(0)
                 return m.Number(0)
         if type(lhs) == m.Number and\
            type(rhs) == m.Reference and\
            binary_operation.op == "*":
             if lhs.value == 0:
-                binary_operation.rhs = m.Number(0)
                 return m.Number(0)
         if type(lhs) == m.Reference and\
            type(rhs) == m.Reference and\
            binary_operation.op == '-':
             if lhs.name == rhs.name:
-                binary_operation.lhs = m.Number(0)
-                binary_operation.rhs = m.Number(0)
                 return m.Number(0)
         return m.BinaryOperation(lhs, binary_operation.op, rhs)
 
@@ -117,9 +114,7 @@ def main():
     ])))
     p.visit(v.visit(m.FunctionDefinition('fu', m.Function([], []))))
     p.visit(v.visit(m.FunctionCall(m.Reference('fu'), [])))
-    p.visit(v.visit(m.BinaryOperation(m.BinaryOperation(m.Number(0), '*',
-                                      m.Reference('d')), '*',
-                                      m.Reference('s'))))
+
 
 if __name__ == "__main__":
     main()
