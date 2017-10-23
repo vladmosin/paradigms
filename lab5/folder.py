@@ -30,7 +30,7 @@ class ConstantFolder:
            type(binary_operation.lhs) == m.Reference and\
            binary_operation.op == "*":
             if binary_operation.rhs.value == 0:
-                binary_operation.rhs = m.Number(0)
+                binary_operation.lhs = m.Number(0)
                 return m.Number(0)
         if type(binary_operation.lhs) == m.Number and\
            type(binary_operation.rhs) == m.Reference and\
@@ -42,8 +42,7 @@ class ConstantFolder:
            type(binary_operation.rhs) == m.Reference and\
            binary_operation.op == "-":
             if binary_operation.lhs.name == binary_operation.rhs.name:
-                binary_operation.lhs = m.Number(0)
-                binary_operation.rhs = m.Number(0)
+                binary_operation = m.Number(0)
                 return m.Number(0)
         return binary_operation
 
