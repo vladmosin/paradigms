@@ -4,64 +4,47 @@ import printer as printer
 
 class ConstantFolder:
     def __init__(self):
-        self.oper = 0
         self.scope = m.Scope()
 
     def visit(self, tree):
-        self.oper = 0
         return tree.accept(self)
 
     def visitNumber(self, number):
         return number
 
     def visitReference(self, reference):
-        self.oper = 1
         return reference
 
     def visitUnaryOperation(self, unary_operation):
-        current_oper = self.oper
-        self.oper = 0
-        current = unary_operation.expr.accept(self)
-        if self.oper == 0:
-            return m.Number(unary_operation.evaluate(self.scope).value)
+        expr = unary_operation.expr.accept(self)
+        if type(expr) == m.Number:
+            return unary_operation.evaluate(self.scope)
         return unary_operation
 
     def visitBinaryOperation(self, binary_operation):
-        current_oper = self.oper
-        self.oper = 0
-        count_lhs = 0
-        count_rhs = 0
         lhs = binary_operation.lhs.accept(self)
-        count_lhs = self.oper
-        self.oper = 0
         rhs = binary_operation.rhs.accept(self)
-        count_rhs = self.oper
-        self.oper = max(count_lhs, count_rhs)
-        if self.oper == 0:
-            return m.Number(binary_operation.evaluate(self.scope).value)
-        else:
-            if count_rhs == 0:
-                if binary_operation.rhs.evaluate(self.scope).value == 0 and\
-                   type(binary_operation.lhs) == m.Reference and\
-                   binary_operation.op == "*":
-                    self.oper = 0
-                    binary_operation.lhs = m.Number(0)
-                    return m.Number(0)
-            if count_lhs == 0:
-                if binary_operation.lhs.evaluate(self.scope).value == 0 and\
-                   type(binary_operation.rhs) == m.Reference and\
-                   binary_operation.op == "*":
-                    self.oper = 0
-                    binary_operation.rhs = m.Number(0)
-                    return m.Number(0)
-            if type(binary_operation.lhs) == m.Reference and\
-               type(binary_operation.rhs) == m.Reference and\
-               binary_operation.op == "-":
-                if binary_operation.lhs.name == binary_operation.rhs.name:
-                    self.oper = 0
-                    binary_operation.lhs = m.Number(0)
-                    binary_operation.rhs = m.Number(0)
-                    return m.Number(0)
+        if type(lhs) == m.Number and type(rhs) == m.Number:
+            return binary_operation.evaluate(self.scope)
+        if type(binary_operation.rhs) == m.Number and\
+           type(binary_operation.lhs) == m.Reference and\
+           binary_operation.op == "*":
+            if binary_operation.rhs.value == 0:
+                binary_operation.rhs = m.Number(0)
+                return m.Number(0)
+        if type(binary_operation.lhs) == m.Number and\
+           type(binary_operation.rhs) == m.Reference and\
+           binary_operation.op == "*":
+            if binary_operation.rhs.value == 0:
+                binary_operation.rhs = m.Number(0)
+                return m.Number(0)
+        if type(binary_operation.lhs) == m.Reference and\
+           type(binary_operation.rhs) == m.Reference and\
+           binary_operation.op == "-":
+            if binary_operation.lhs.name == binary_operation.rhs.name:
+                binary_operation.lhs = m.Number(0)
+                binary_operation.rhs = m.Number(0)
+                return m.Number(0)
         return binary_operation
 
     def visitFunctionDefinition(self, func_def):
@@ -82,7 +65,6 @@ class ConstantFolder:
                              true_list, false_list)
 
     def visitFunctionCall(self, func_call):
-        self.oper = 1
         list_of_args = []
         for arg in func_call.args or []:
             list_of_args.append(arg.accept(self))
