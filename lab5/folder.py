@@ -1,5 +1,5 @@
 import yat.model as m
-import printer as printer
+import yat.printer as printer
 
 
 class ConstantFolder:
@@ -20,7 +20,7 @@ class ConstantFolder:
         if type(expr) == m.Number:
             return m.UnaryOperation(unary_operation.op,
                                     expr).evaluate(self.scope)
-        return m.sUnaryOperation(unary_operation.op, expr)
+        return m.UnaryOperation(unary_operation.op, expr)
 
     def visitBinaryOperation(self, binary_operation):
         lhs = binary_operation.lhs.accept(self)
