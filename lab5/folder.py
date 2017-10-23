@@ -81,6 +81,45 @@ class ConstantFolder:
 def main():
     v = ConstantFolder()
     p = printer.PrettyPrinter()
+    p.visit(v.visit(m.Print(m.Number(10))))
+    p.visit(v.visit(m.UnaryOperation('-', m.Number(10))))
+    p.visit(v.visit(m.BinaryOperation(m.BinaryOperation(
+                              m.Reference('foo'), '+',
+                              m.Number(7)), '*', m.Number(2))))
+    p.visit(v.visit(m.Read("read")))
+    p.visit(v.visit(m.Conditional(m.Number(5), [
+                    m.BinaryOperation(m.Reference('var'), '-',
+                                      m.Number(-5))])))
+    p.visit(v.visit(m.FunctionDefinition('summer', m.Function(['a', 'b'], [
+            m.Print(m.BinaryOperation(m.Reference('a'), '+',
+                                      m.Reference('b'))),
+            m.BinaryOperation(m.Reference('a'), '+', m.Reference('b'))]))))
+    p.visit(v.visit(m.FunctionCall(m.Reference('summer'), [
+                    m.Number(1),
+                    m.BinaryOperation(m.Number(2), '+', m.Number(3))])))
+    p.visit(v.visit(m.Print(m.Conditional(m.BinaryOperation(
+          m.Number(4), '-', m.Number(4)), [], [
+          m.BinaryOperation(m.Number(9), '/', m.Number(3)), m.Reference('var')
+          ]))))
+    p.visit(v.visit(m.FunctionDefinition('abs', m.Function(['a', 'b'], [
+        m.Conditional(m.BinaryOperation(
+                      m.BinaryOperation(m.Reference('a'), '-',
+                                        m.Reference('b')), '>', m.Number(0)), [
+                    m.Print(m.BinaryOperation(m.Reference('a'), '-',
+                                              m.Reference('b')))
+                    ], [
+            m.Print(m.BinaryOperation(m.Reference('b'), '-', m.Reference('a')))
+        ])
+    ]))))
+    p.visit(v.visit(m.FunctionCall(m.Reference('abs'), [
+        m.Number(23),
+        m.UnaryOperation('-', m.Number(-30))
+    ])))
+    p.visit(v.visit(m.FunctionDefinition('fu', m.Function([], []))))
+    p.visit(v.visit(m.FunctionCall(m.Reference('fu'), [])))
+    p.visit(v.visit(m.BinaryOperation(m.BinaryOperation(m.Number(0), '*',
+                                      m.Reference('d')), '*',
+                                      m.Reference('s'))))
 
 if __name__ == "__main__":
     main()
