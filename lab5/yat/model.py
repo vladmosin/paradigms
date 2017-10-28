@@ -18,7 +18,7 @@ class Number:
         return self.value != 0
 
     def accept(self, visitor):
-        return visitor.visitNumber(self)
+        return visitor.visit_number(self)
 
 
 class Scope:
@@ -55,7 +55,7 @@ class FunctionDefinition:
         return self.function
 
     def accept(self, visitor):
-        return visitor.visitFunctionDefinition(self)
+        return visitor.visit_function_definition(self)
 
 
 class Conditional:
@@ -71,7 +71,7 @@ class Conditional:
             return evaluate_list(self.if_false, scope)
 
     def accept(self, visitor):
-        return visitor.visitConditional(self)
+        return visitor.visit_conditional(self)
 
 
 class Print:
@@ -84,7 +84,7 @@ class Print:
         return num
 
     def accept(self, visitor):
-        return visitor.visitPrint(self)
+        return visitor.visit_print(self)
 
 
 class Read:
@@ -97,7 +97,7 @@ class Read:
         return scope[self.name]
 
     def accept(self, visitor):
-        return visitor.visitRead(self)
+        return visitor.visit_read(self)
 
 
 class FunctionCall:
@@ -113,7 +113,7 @@ class FunctionCall:
         return evaluate_list(function.body, call_scope)
 
     def accept(self, visitor):
-        return visitor.visitFunctionCall(self)
+        return visitor.visit_function_call(self)
 
 
 class Reference:
@@ -124,7 +124,7 @@ class Reference:
         return scope[self.name]
 
     def accept(self, visitor):
-        return visitor.visitReference(self)
+        return visitor.visit_reference(self)
 
 
 class BinaryOperation:
@@ -153,7 +153,7 @@ class BinaryOperation:
         return Number(int(self.OPERATIONS[self.op](left, right)))
 
     def accept(self, visitor):
-        return visitor.visitBinaryOperation(self)
+        return visitor.visit_binary_operation(self)
 
 
 class UnaryOperation:
@@ -169,7 +169,7 @@ class UnaryOperation:
         return Number(int(self.OPERATIONS[self.op](expression)))
 
     def accept(self, visitor):
-        return visitor.visitUnaryOperation(self)
+        return visitor.visit_unary_operation(self)
 
 
 def evaluate_list(statements, scope):

@@ -1,5 +1,5 @@
 import yat.model as m
-import yat.printer as printer
+import printer as printer
 
 
 class ConstantFolder:
@@ -9,70 +9,65 @@ class ConstantFolder:
     def visit(self, tree):
         return tree.accept(self)
 
-    def visitNumber(self, number):
+    def visit_number(self, number):
         return number
 
-    def visitReference(self, reference):
+    def visit_reference(self, reference):
         return reference
 
-    def visitUnaryOperation(self, unary_operation):
+    def visit_unary_operation(self, unary_operation):
         expr = unary_operation.expr.accept(self)
         if type(expr) == m.Number:
             return m.UnaryOperation(unary_operation.op,
                                     expr).evaluate(self.scope)
         return m.UnaryOperation(unary_operation.op, expr)
 
-    def visitBinaryOperation(self, binary_operation):
+    def visit_binary_operation(self, binary_operation):
         lhs = binary_operation.lhs.accept(self)
         rhs = binary_operation.rhs.accept(self)
         if type(lhs) == m.Number and type(rhs) == m.Number:
             return m.BinaryOperation(lhs, binary_operation.op,
                                      rhs).evaluate(self.scope)
-        if type(rhs) == m.Number and\
-           type(lhs) == m.Reference and\
-           binary_operation.op == "*":
-            if rhs.value == 0:
-                return m.Number(0)
-        if type(lhs) == m.Number and\
-           type(rhs) == m.Reference and\
-           binary_operation.op == "*":
-            if lhs.value == 0:
-                return m.Number(0)
-        if type(lhs) == m.Reference and\
-           type(rhs) == m.Reference and\
-           binary_operation.op == '-':
-            if lhs.name == rhs.name:
-                return m.Number(0)
+        if (type(rhs) == m.Number and rhs.value == 0 and
+           type(lhs) == m.Reference and
+           binary_operation.op == "*"):
+            return m.Number(0)
+        if (type(lhs) == m.Number and lhs.value == 0 and
+           type(rhs) == m.Reference and
+           binary_operation.op == "*"):
+            return m.Number(0)
+        if (type(lhs) == m.Reference and
+           type(rhs) == m.Reference and lhs.name == rhs.name and
+           binary_operation.op == '-'):
+            return m.Number(0)
         return m.BinaryOperation(lhs, binary_operation.op, rhs)
 
-    def visitFunctionDefinition(self, func_def):
-        body = []
-        for statement in func_def.function.body or []:
-            body.append(statement.accept(self))
-        func_def.function.body = body
-        return m.FunctionDefinition(func_def.name, func_def.function)
+    def visit_function_definition(self, func_def):
+        body = make_list_of_args(func_def.function.body, self)
+        return m.FunctionDefinition(func_def.name,
+                                    m.Function(func_def.function.args, body))
 
-    def visitConditional(self, conditional):
-        true_list = []
-        false_list = []
-        for true_statement in conditional.if_true or []:
-            true_list.append(true_statement.accept(self))
-        for false_statement in conditional.if_false or []:
-            false_list.append(false_statement.accept(self))
+    def visit_conditional(self, conditional):
+        true_list = make_list_of_args(conditional.if_true, self)
+        false_list = make_list_of_args(conditional.if_false, self)
         return m.Conditional(conditional.condition.accept(self),
                              true_list, false_list)
 
-    def visitFunctionCall(self, func_call):
-        list_of_args = []
-        for arg in func_call.args or []:
-            list_of_args.append(arg.accept(self))
+    def visit_function_call(self, func_call):
+        list_of_args = make_list_of_args(func_call.args, self)
         return m.FunctionCall(func_call.fun_expr.accept(self), list_of_args)
 
-    def visitPrint(self, print_expr):
+    def visit_print(self, print_expr):
         return m.Print(print_expr.expr.accept(self))
 
-    def visitRead(self, read_expr):
+    def visit_read(self, read_expr):
         return m.Read(read_expr.name)
+
+
+def make_list_of_args(list_of_args, visitor):
+    new_list_of_args = [true_statement.accept(visitor)
+                        for true_statement in list_of_args or []]
+    return new_list_of_args
 
 
 def main():
@@ -114,7 +109,8 @@ def main():
     ])))
     p.visit(v.visit(m.FunctionDefinition('fu', m.Function([], []))))
     p.visit(v.visit(m.FunctionCall(m.Reference('fu'), [])))
-
+    p.visit(v.visit(m.BinaryOperation(m.Reference('g'),
+                    '-', m.Reference('a'))))
 
 if __name__ == "__main__":
     main()
