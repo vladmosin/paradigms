@@ -24,29 +24,28 @@ class PrettyPrinter:
                                    binary_operation.rhs.accept(self))
 
     def visit_function_definition(self, func_def):
-        args = ", ".join(arg for arg in func_def.function.args or [])
-        string_to_return = "def {}({}) {{\n".format(func_def.name, args)
-        self.spaces += 4
-        string_to_return += self.format_list(func_def.function.body)
-        self.spaces -= 4
-        string_to_return += "{}}}".format(self.print_spaces())
-        return string_to_return
+        return "def {}({}) {{\n{}{}}}".format(
+                                       func_def.name,
+                                       ", ".join(arg
+                                                 for arg in
+                                                 func_def.function.args or []
+                                                 ), self.format_list(
+                                             func_def.function.body),
+                                       self.print_spaces())
 
     def visit_conditional(self, conditional):
-        string_to_return = "if ({}) {{\n".format(
-            conditional.condition.accept(self))
-        self.spaces += 4
-        string_to_return += "{}{}}} else {{\n{}".format(
+        string_format = "if ({}) {{\n{}{}}} else {{\n{}{}}}"
+        return string_format.format(
+                             conditional.condition.accept(self),
                              self.format_list(conditional.if_true),
-                             " " * (self.spaces - 4),
-                             self.format_list(conditional.if_false))
-        self.spaces -= 4
-        return "{}{}}}".format(string_to_return, self.print_spaces())
+                             self.print_spaces(),
+                             self.format_list(conditional.if_false),
+                             self.print_spaces())
 
     def visit_function_call(self, func_call):
-        formatted_args = ", ".join(arg.accept(self)
-                                   for arg in func_call.args or [])
-        return "{}({})".format(func_call.fun_expr.accept(self), formatted_args)
+        return "{}({})".format(func_call.fun_expr.accept(self),
+                               ", ".join(arg.accept(self)
+                                         for arg in func_call.args or []))
 
     def visit_print(self, print_expr):
         return "print {}".format(print_expr.expr.accept(self))
@@ -55,8 +54,13 @@ class PrettyPrinter:
         return "read {}".format(read_expr.name)
 
     def format_list(self, formatted_list):
-        return "".join("{}{};\n".format(self.print_spaces(), expr.accept(self))
-                       for expr in formatted_list or [])
+        self.spaces += 4
+        string_to_return = "".join("{}{};\n".format(
+                                             self.print_spaces(),
+                                             expr.accept(self))
+                                   for expr in formatted_list or [])
+        self.spaces -= 4
+        return string_to_return
 
     def print_spaces(self):
         return " " * self.spaces

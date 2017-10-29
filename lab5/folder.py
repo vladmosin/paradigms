@@ -43,20 +43,19 @@ class ConstantFolder:
         return m.BinaryOperation(lhs, binary_operation.op, rhs)
 
     def visit_function_definition(self, func_def):
-        function_body = self.format_list(func_def.function.body)
-        return m.FunctionDefinition(func_def.name,
-                                    m.Function(func_def.function.args,
-                                               function_body))
+        return m.FunctionDefinition(
+               func_def.name,
+               m.Function(func_def.function.args,
+                          self.turn_list(func_def.function.body)))
 
     def visit_conditional(self, conditional):
-        true_list = self.format_list(conditional.if_true)
-        false_list = self.format_list(conditional.if_false)
         return m.Conditional(conditional.condition.accept(self),
-                             true_list, false_list)
+                             self.turn_list(conditional.if_true),
+                             self.turn_list(conditional.if_false))
 
     def visit_function_call(self, func_call):
-        formatted_args = self.format_list(func_call.args)
-        return m.FunctionCall(func_call.fun_expr.accept(self), formatted_args)
+        return m.FunctionCall(func_call.fun_expr.accept(self),
+                              self.turn_list(func_call.args))
 
     def visit_print(self, print_expr):
         return m.Print(print_expr.expr.accept(self))
@@ -64,7 +63,7 @@ class ConstantFolder:
     def visit_read(self, read_expr):
         return m.Read(read_expr.name)
 
-    def format_list(self, formatted_args):
+    def turn_list(self, formatted_args):
         return [formatted_arg.accept(self)
                 for formatted_arg in formatted_args or []]
 
