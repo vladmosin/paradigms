@@ -31,7 +31,6 @@ class PrettyPrinter:
             self.return_spaces())
 
     def visit_conditional(self, conditional):
-        string_format = "if ({}) {{\n{}{}}} else {{\n{}{}}}"
         return "if ({}) {{\n{}{}}} else {{\n{}{}}}".format(
             conditional.condition.accept(self),
             self.format_list(conditional.if_true),
