@@ -1,5 +1,5 @@
 import yat.model as m
-import printer as printer
+import yat.printer as printer
 
 
 class ConstantFolder:
@@ -43,19 +43,20 @@ class ConstantFolder:
         return m.BinaryOperation(lhs, binary_operation.op, rhs)
 
     def visit_function_definition(self, func_def):
-        body = make_list_of_args(func_def.function.body, self)
+        function_body = self.format_list(func_def.function.body)
         return m.FunctionDefinition(func_def.name,
-                                    m.Function(func_def.function.args, body))
+                                    m.Function(func_def.function.args,
+                                               function_body))
 
     def visit_conditional(self, conditional):
-        true_list = make_list_of_args(conditional.if_true, self)
-        false_list = make_list_of_args(conditional.if_false, self)
+        true_list = self.format_list(conditional.if_true)
+        false_list = self.format_list(conditional.if_false)
         return m.Conditional(conditional.condition.accept(self),
                              true_list, false_list)
 
     def visit_function_call(self, func_call):
-        list_of_args = make_list_of_args(func_call.args, self)
-        return m.FunctionCall(func_call.fun_expr.accept(self), list_of_args)
+        formatted_args = self.format_list(func_call.args)
+        return m.FunctionCall(func_call.fun_expr.accept(self), formatted_args)
 
     def visit_print(self, print_expr):
         return m.Print(print_expr.expr.accept(self))
@@ -63,11 +64,9 @@ class ConstantFolder:
     def visit_read(self, read_expr):
         return m.Read(read_expr.name)
 
-
-def make_list_of_args(list_of_args, visitor):
-    new_list_of_args = [true_statement.accept(visitor)
-                        for true_statement in list_of_args or []]
-    return new_list_of_args
+    def format_list(self, formatted_args):
+        return [formatted_arg.accept(self)
+                for formatted_arg in formatted_args or []]
 
 
 def main():
