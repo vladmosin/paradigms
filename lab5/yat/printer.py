@@ -25,22 +25,19 @@ class PrettyPrinter:
 
     def visit_function_definition(self, func_def):
         return "def {}({}) {{\n{}{}}}".format(
-                                       func_def.name,
-                                       ", ".join(arg
-                                                 for arg in
-                                                 func_def.function.args or []
-                                                 ), self.format_list(
-                                             func_def.function.body),
-                                       self.print_spaces())
+            func_def.name,
+            ", ".join(arg for arg in func_def.function.args or []),
+            self.format_list(func_def.function.body),
+            self.print_spaces())
 
     def visit_conditional(self, conditional):
         string_format = "if ({}) {{\n{}{}}} else {{\n{}{}}}"
-        return string_format.format(
-                             conditional.condition.accept(self),
-                             self.format_list(conditional.if_true),
-                             self.print_spaces(),
-                             self.format_list(conditional.if_false),
-                             self.print_spaces())
+        return "if ({}) {{\n{}{}}} else {{\n{}{}}}".format(
+            conditional.condition.accept(self),
+            self.format_list(conditional.if_true),
+            self.print_spaces(),
+            self.format_list(conditional.if_false),
+            self.print_spaces())
 
     def visit_function_call(self, func_call):
         return "{}({})".format(func_call.fun_expr.accept(self),
