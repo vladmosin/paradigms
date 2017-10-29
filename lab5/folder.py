@@ -46,16 +46,16 @@ class ConstantFolder:
         return m.FunctionDefinition(
                func_def.name,
                m.Function(func_def.function.args,
-                          self.shrink_list(func_def.function.body)))
+                          self.optimize_list(func_def.function.body)))
 
     def visit_conditional(self, conditional):
         return m.Conditional(conditional.condition.accept(self),
-                             self.shrink_list(conditional.if_true),
-                             self.shrink_list(conditional.if_false))
+                             self.optimize_list(conditional.if_true),
+                             self.optimize_list(conditional.if_false))
 
     def visit_function_call(self, func_call):
         return m.FunctionCall(func_call.fun_expr.accept(self),
-                              self.shrink_list(func_call.args))
+                              self.optimize_list(func_call.args))
 
     def visit_print(self, print_expr):
         return m.Print(print_expr.expr.accept(self))
@@ -63,9 +63,9 @@ class ConstantFolder:
     def visit_read(self, read_expr):
         return m.Read(read_expr.name)
 
-    def shrink_list(self, shrinked_list):
-        return [arg.accept(self)
-                for arg in shrinked_list or []]
+    def optimize_list(self, expr_list):
+        return [expr.accept(self)
+                for expr in expr_list or []]
 
 
 def main():

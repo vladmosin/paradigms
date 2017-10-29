@@ -28,21 +28,21 @@ class PrettyPrinter:
             func_def.name,
             ", ".join(arg for arg in func_def.function.args or []),
             self.format_list(func_def.function.body),
-            self.print_spaces())
+            self.return_spaces())
 
     def visit_conditional(self, conditional):
         string_format = "if ({}) {{\n{}{}}} else {{\n{}{}}}"
         return "if ({}) {{\n{}{}}} else {{\n{}{}}}".format(
             conditional.condition.accept(self),
             self.format_list(conditional.if_true),
-            self.print_spaces(),
+            self.return_spaces(),
             self.format_list(conditional.if_false),
-            self.print_spaces())
+            self.return_spaces())
 
     def visit_function_call(self, func_call):
-        return "{}({})".format(func_call.fun_expr.accept(self),
-                               ", ".join(arg.accept(self)
-                                         for arg in func_call.args or []))
+        return "{}({})".format(
+            func_call.fun_expr.accept(self),
+            ", ".join(arg.accept(self) for arg in func_call.args or []))
 
     def visit_print(self, print_expr):
         return "print {}".format(print_expr.expr.accept(self))
@@ -50,16 +50,15 @@ class PrettyPrinter:
     def visit_read(self, read_expr):
         return "read {}".format(read_expr.name)
 
-    def format_list(self, formatted_list):
+    def format_list(self, expr_list):
         self.spaces += 4
-        string_to_return = "".join("{}{};\n".format(
-                                             self.print_spaces(),
-                                             expr.accept(self))
-                                   for expr in formatted_list or [])
+        result = "".join("{}{};\n".format(
+            self.return_spaces(),
+            expr.accept(self)) for expr in expr_list or [])
         self.spaces -= 4
-        return string_to_return
+        return result
 
-    def print_spaces(self):
+    def return_spaces(self):
         return " " * self.spaces
 
 
