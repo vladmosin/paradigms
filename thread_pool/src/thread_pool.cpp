@@ -4,9 +4,9 @@
 
 void* start_thread(void* pool) {
     while (!((ThreadPool*) pool)->finish || !((ThreadPool*) pool)->tasks.empty()) {
+        pthread_mutex_lock(&((ThreadPool*) pool)->mutex);
         while (((ThreadPool*) pool)->tasks.empty() && !((ThreadPool*) pool)->finish)
             pthread_cond_wait(&(((ThreadPool*) pool)->cond), &((ThreadPool*) pool)->mutex);
-        pthread_mutex_lock(&(((ThreadPool*) pool)->mutex));
         if (((ThreadPool*) pool)->tasks.empty())
             pthread_mutex_unlock(&((ThreadPool*) pool)->mutex);
         else {
@@ -43,6 +43,7 @@ void thpool_wait(Task* task) {
     pthread_mutex_lock(&task->mutex);
     while(task->finish == false)
         pthread_cond_wait(&task->cond, &task->mutex);
+    pthread_mutex_unlock(&task->mutex);
 }
 
 void thpool_finit(ThreadPool* pool) {
