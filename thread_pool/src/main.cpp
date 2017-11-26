@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     ThreadPool pool;
     thpool_init(&pool, atoi(argv[1]));
     Task task[1000];
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
         task[i].f = crazy_func;
         task[i].arg = NULL;
         thpool_submit(&pool, &task[i]);
