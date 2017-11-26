@@ -8,7 +8,7 @@ void* thread_work(void* given_pool) {
         pthread_mutex_lock(&pool->mutex);
         while (pool->tasks.empty() && !pool->finish)
             pthread_cond_wait(&pool->cond, &pool->mutex);
-        if (pool->finish) {
+        if (pool->tasks.empty()) {
             pthread_mutex_unlock(&pool->mutex);
             break;
         }
