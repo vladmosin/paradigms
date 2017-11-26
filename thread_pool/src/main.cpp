@@ -7,7 +7,7 @@
 
 void crazy_func(void*) {
     long long c = 3374;
-    for (long long i = 0; i < 10000000; i++) {
+    for (long long i = 0; i < 1000000000; i++) {
         c += c * cos(c);
     }
 }

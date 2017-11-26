@@ -4,12 +4,13 @@
 
 void* thread_work(void* given_pool) {
     ThreadPool* pool = (ThreadPool*) given_pool;
-    while (!pool->finish) {
+    while (true) {
         pthread_mutex_lock(&pool->mutex);
         while (pool->tasks.empty() && !pool->finish)
             pthread_cond_wait(&pool->cond, &pool->mutex);
-        if (pool->tasks.empty()) {
+        if (pool->finish) {
             pthread_mutex_unlock(&pool->mutex);
+            break;
         }
         else {
             Task* task = pool->tasks.front();
