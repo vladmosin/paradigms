@@ -8,8 +8,13 @@ void* thread_work(void* given_pool) {
         pthread_mutex_lock(&pool->mutex);
         while (pool->tasks.empty() && !pool->finish)
             pthread_cond_wait(&pool->cond, &pool->mutex);
-        if (pool->tasks.empty())
+        if (pool->tasks.empty()) {
+            if (pool->tasks.empty() && pool->finish) {
+                pthread_mutex_unlock(&pool->mutex);
+                break;
+            }
             pthread_mutex_unlock(&pool->mutex);
+        }
         else {
             Task* task = pool->tasks.front();
             pool->not_free_tasks.push_back(task);
@@ -21,12 +26,6 @@ void* thread_work(void* given_pool) {
             pthread_cond_broadcast(&task->cond);
             pthread_mutex_unlock(&task->mutex);
         }
-        pthread_mutex_lock(&pool->mutex);
-        if (pool->tasks.empty() && pool->finish) {
-            pthread_mutex_unlock(&pool->mutex);
-            break;
-        }
-        pthread_mutex_unlock(&pool->mutex);
     }
     return NULL;
 }
