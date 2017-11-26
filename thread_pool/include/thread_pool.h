@@ -1,6 +1,7 @@
 #pragma once
 #include <pthread.h>
 #include <queue>
+#include <vector>
 
 
 typedef struct Task {
@@ -12,7 +13,7 @@ typedef struct Task {
 } Task;
 
 typedef struct ThreadPool {
-    pthread_t* threads;
+    std::vector<pthread_t> threads;
     std::queue<Task*> tasks; 
     bool finish;
     unsigned size;
