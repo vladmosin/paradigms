@@ -2,7 +2,7 @@
 #include <cstdio>
 
 
-void* start_work(void* given_pool) {
+void* thread_work(void* given_pool) {
     ThreadPool* pool = (ThreadPool*) given_pool;
     while (true) {
         pthread_mutex_lock(&pool->mutex);
@@ -12,13 +12,14 @@ void* start_work(void* given_pool) {
             pthread_mutex_unlock(&pool->mutex);
         else {
             Task* task = pool->tasks.front();
+            pool->not_free_tasks.push_back(task);
             pool->tasks.pop();
             pthread_mutex_unlock(&pool->mutex);
             task->f(task->arg);
             pthread_mutex_lock(&task->mutex);
             task->finish = true;
-            pthread_mutex_unlock(&task->mutex);
             pthread_cond_broadcast(&task->cond);
+            pthread_mutex_unlock(&task->mutex);
         }
         pthread_mutex_lock(&pool->mutex);
         if (pool->tasks.empty() && pool->finish) {
@@ -34,10 +35,9 @@ void thpool_init(ThreadPool* pool, unsigned threads_nm) {
     pthread_mutex_init(&pool->mutex, NULL);
     pthread_cond_init(&pool->cond, NULL);
     pool->finish = false;
-    pool->size = threads_nm;
     pool->threads.resize(threads_nm);
     for (unsigned i = 0; i < threads_nm; i++) {
-        pthread_create(&pool->threads[i], NULL, start_work, pool);
+        pthread_create(&pool->threads[i], NULL, thread_work, pool);
     }
 }
 
@@ -47,10 +47,11 @@ void thpool_submit(ThreadPool* pool, Task* task) {
     task->finish = false;
     pthread_cond_init(&task->cond, NULL);
     pthread_mutex_unlock(&task->mutex);
+    
     pthread_mutex_lock(&pool->mutex);
     pool->tasks.push(task);
+    pthread_cond_signal(&pool->cond); 
     pthread_mutex_unlock(&pool->mutex); 
-    pthread_cond_signal(&pool->cond);   
 }
 
 void thpool_wait(Task* task) {
@@ -63,11 +64,18 @@ void thpool_wait(Task* task) {
 void thpool_finit(ThreadPool* pool) {
     pthread_mutex_lock(&pool->mutex);
     pool->finish = true;
-    pthread_mutex_unlock(&pool->mutex);
     pthread_cond_broadcast(&pool->cond);
-    for (unsigned i = 0; i < pool->size; i++) {
+    pthread_mutex_unlock(&pool->mutex);
+    
+    for (unsigned i = 0; i < pool->threads.size(); i++) {
         pthread_join(pool->threads[i], NULL);
     }
+    
+    for (unsigned i = 0; i < pool->not_free_tasks.size(); i++) {
+        pthread_cond_destroy(&pool->not_free_tasks[i]->cond);
+        pthread_mutex_destroy(&pool->not_free_tasks[i]->mutex);
+    }
+    
     pthread_cond_destroy(&pool->cond);
     pthread_mutex_destroy(&pool->mutex);
 }

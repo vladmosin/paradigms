@@ -15,8 +15,8 @@ typedef struct Task {
 typedef struct ThreadPool {
     std::vector<pthread_t> threads;
     std::queue<Task*> tasks; 
+    std::vector<Task*> not_free_tasks;
     bool finish;
-    unsigned size;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
 } ThreadPool;
