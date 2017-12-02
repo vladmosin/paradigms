@@ -1,7 +1,7 @@
-head' (x:xs) = x
+head' (x:_) = x
 
-tail' (x:xs) = xs
-tail' [] = []
+tail' (_:xs) = xs
+tail' _ = []
 
 take' 0 _ = []
 take' _ [] = []
@@ -9,10 +9,10 @@ take' n (x:xs) = x:(take' (n - 1) xs)
 
 drop' 0 xs = xs
 drop' _ [] = []
-drop' n (x:xs) = drop' (n - 1) xs
+drop' n (_:xs) = drop' (n - 1) xs
 
 foldl' f z (x:xs) = f x (foldl' f z xs)
-foldl' f a _ = a
+foldl' _ a _ = a
 
 concat' xs [] = xs
 concat' lst (x:xs) = concat' (lst ++ [x]) xs
