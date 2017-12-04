@@ -1,7 +1,7 @@
 head' (x:_) = x
 
 tail' (_:xs) = xs
-tail' _      = []
+tail' []     = []
 
 take' 0 _      = []
 take' _ []     = []
@@ -14,8 +14,8 @@ drop' n (_:xs) = drop' (n - 1) xs
 foldl' f a (x:xs) = f x (foldl' f a xs)
 foldl' _ a _      = a
 
-concat' lst (x:xs) = concat' (lst ++ [x]) xs
-concat' xs _       = xs
+concat' (x:xs) lst = x:concat' xs lst
+concat' [] lst     = lst
 
 filter' _  [] = []
 filter' f (x:xs) | f x       = x:(filter' f xs)
