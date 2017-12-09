@@ -14,11 +14,11 @@ insert k' v' (Node k v l r)
     | k' > k  = Node k v l (insert k' v' r)
     | k' < k  = Node k v (insert k' v' l) r
 
-addRight node (Node k v l Nil) = Node k v l node
-addRight node r = r
+addRight node Nil = node
+addRight node (Node k v l r)   = Node k v l (addRight node r)
 
 delete _ Nil = Nil
 delete k' (Node k v l r)
-    | k' == k = (addRight r l)
+    | k' == k = addRight r l
     | k' < k  = Node k v (delete k' l) r
     | k' > k  = Node k v l (delete k' r)
