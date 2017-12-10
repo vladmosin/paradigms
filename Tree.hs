@@ -4,21 +4,21 @@ data BinaryTree key value =  Nil | Node key value (BinaryTree key value) (Binary
 
 lookup _ Nil = Nothing
 lookup k' (Node k v l r)
-    | k' == k = Just v
-    | k' < k  = lookup k' l
-    | k' > k  = lookup k' r
+    | k' < k    = lookup k' l
+    | k' > k    = lookup k' r
+    | otherwise = Just v
 
 insert k' v' Nil = Node k' v' Nil Nil
 insert k' v' (Node k v l r)
-    | k' == k = Node k' v' l r
-    | k' > k  = Node k v l (insert k' v' r)
-    | k' < k  = Node k v (insert k' v' l) r
+    | k' > k    = Node k v l (insert k' v' r)
+    | k' < k    = Node k v (insert k' v' l) r
+    | otherwise = Node k' v' l r
 
-addRight node Nil = node
-addRight node (Node k v l r)   = Node k v l (addRight node r)
+merge Nil node            = node
+merge (Node k v l r) node = Node k v l (merge r node)
 
 delete _ Nil = Nil
 delete k' (Node k v l r)
-    | k' == k = addRight r l
-    | k' < k  = Node k v (delete k' l) r
-    | k' > k  = Node k v l (delete k' r)
+    | k' < k    = Node k v (delete k' l) r
+    | k' > k    = Node k v l (delete k' r)
+    | otherwise = merge l r
