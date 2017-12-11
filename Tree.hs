@@ -1,6 +1,6 @@
 import Prelude hiding (lookup)
 
-data BinaryTree key value =  Nil | Node key value (BinaryTree key value) (BinaryTree key value) deriving (Show, Eq)
+data BinaryTree k v = Nil | Node k v (BinaryTree k v) (BinaryTree k v) deriving (Show, Eq)
 
 lookup _ Nil = Nothing
 lookup k' (Node k v l r)
@@ -14,7 +14,7 @@ insert k' v' (Node k v l r)
     | k' < k    = Node k v (insert k' v' l) r
     | otherwise = Node k' v' l r
 
-merge Nil node            = node
+merge Nil            node = node
 merge (Node k v l r) node = Node k v l (merge r node)
 
 delete _ Nil = Nil
