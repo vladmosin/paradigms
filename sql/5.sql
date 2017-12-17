@@ -1,6 +1,6 @@
 /* 5 SQL Request*/
-SELECT GovernmentForm, Sum(SurfaceArea) AS totalArea 
+SELECT GovernmentForm, Sum(SurfaceArea) 
 FROM Country
 GROUP BY Country.GovernmentForm
-ORDER BY totalArea DESC
+ORDER BY Sum(SurfaceArea) DESC
 LIMIT 1;
