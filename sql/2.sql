@@ -4,5 +4,5 @@ FROM LiteracyRate
 JOIN Country ON LiteracyRate.CountryCode = Country.Code
 GROUP BY CountryCode
 HAVING Max(Year)
-ORDER BY Rate desc 
+ORDER BY Rate DESC 
 LIMIT 1;
