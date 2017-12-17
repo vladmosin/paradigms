@@ -1,5 +1,6 @@
 /* 6 SQL Request*/
-select City.Name, City.Population, Country.Name from City
-join Country on City.CountryCode = Country.Code
-order by (cast((City.Population) as float) / Country.Population) desc, City.Name desc
-limit 20;
+SELECT City.Name, City.Population, Country.Population 
+FROM City
+JOIN Country ON City.CountryCode = Country.Code
+ORDER BY (cast((City.Population) AS FLOAT) / Country.Population) desc, City.Name desc
+LIMIT 20;

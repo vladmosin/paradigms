@@ -1,2 +1,5 @@
 /* 1 SQL Request*/
-select Name from Country order by SurfaceArea desc, Name limit 5;
+SELECT Name 
+FROM Country 
+ORDER BY SurfaceArea desc, Name
+LIMIT 5;

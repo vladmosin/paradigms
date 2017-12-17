@@ -1,5 +1,8 @@
 /* 2 SQL Request*/
-select Country.Name, Rate from LiteracyRate 
-join Country on LiteracyRate.CountryCode = Country.Code
-Group by CountryCode
-order by Year desc limit 1;
+SELECT Country.Name, Rate 
+FROM LiteracyRate 
+JOIN Country ON LiteracyRate.CountryCode = Country.Code
+GROUP BY CountryCode
+HAVING Max(Year)
+ORDER BY Rate desc 
+LIMIT 1;

@@ -1,3 +1,4 @@
 /* 3 SQL Request*/
-select City.Name from Country, City, Capital
-where Country.Name = 'Malaysia' and Capital.CityId = City.Id and City.CountryCode = Country.Code;
+SELECT City.Name from City, Capital
+JOIN Country ON City.CountryCode = Country.Code
+WHERE Country.Name = 'Malaysia' AND Capital.CityId = City.Id;
